@@ -8,6 +8,9 @@ import { UserFormData, TelecomData, PostoTrabalhoData } from './types';
 import html2canvas from 'html2canvas';
 import * as FileSaverLib from 'file-saver';
 
+// 1. IMPORTAÇÃO DIRETA DA LOGO (O Vite resolve o caminho automaticamente)
+import logoImg from './assets/logo.jpg';
+
 const saveAs = (FileSaverLib as any).default?.saveAs || (FileSaverLib as any).saveAs || (FileSaverLib as any).default || FileSaverLib;
 
 const COMPANY_OPTIONS = ["AFC", "AGS", "AGSII", "AGSIII", "CEC", "CECII", "AL", "ALC", "HoC", "PAULA"];
@@ -39,8 +42,8 @@ const App: React.FC = () => {
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<'TR' | 'TD'>('TR');
-  const [logoBase64, setLogoBase64] = useState<string | null>(null);
   
+  // 2. ESTADO DE LOGO SIMPLIFICADO (Não precisamos mais de Base64 se usarmos import)
   const [telecomData, setTelecomData] = useState<TelecomData[]>([]);
   const [postoTrabalhoData, setPostoTrabalhoData] = useState<PostoTrabalhoData[]>([]);
   const [selectedTelecom, setSelectedTelecom] = useState<TelecomData[]>([]);
@@ -58,26 +61,7 @@ const App: React.FC = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isCapturingImage, setIsCapturingImage] = useState(false);
 
-  // Carregar logo da pasta public
-  useEffect(() => {
-    const loadLogo = async () => {
-      const baseUrl = import.meta.env.PROD ? '/termoIT/' : './';
-      try {
-        const response = await fetch(`${baseUrl}logo.jpg`);
-        if (response.ok) {
-          const blob = await response.blob();
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setLogoBase64(reader.result as string);
-          };
-          reader.readAsDataURL(blob);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar logo:', error);
-      }
-    };
-    loadLogo();
-  }, []);
+  // 3. REMOVIDO O useEffect DO FETCH (Menos código, menos erro)
 
   const handleExcelUpload = async (file: File) => {
     setExcelFile(file);
@@ -112,7 +96,13 @@ const App: React.FC = () => {
     if (!el) return;
     setIsCapturingImage(true);
     try {
-      const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+      // Adicionado allowTaint e useCORS para garantir que a imagem carregue no canvas
+      const canvas = await html2canvas(el, { 
+        scale: 3, 
+        useCORS: true, 
+        allowTaint: true,
+        backgroundColor: '#ffffff' 
+      });
       canvas.toBlob(blob => blob && saveAs(blob, `Termo_${formData.nomeColaborador}.jpg`), 'image/jpeg', 1.0);
     } finally {
       setIsCapturingImage(false);
@@ -135,12 +125,10 @@ const App: React.FC = () => {
     return (
       <div id="document-print-area" className="bg-white text-black p-[15mm] mx-auto relative text-justify shadow-inner" style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, sans-serif' }}>
         
-        {/* LOGO */}
-        {logoBase64 && (
-          <div className="absolute top-[15mm] right-[15mm] w-40 h-20 flex justify-end items-start">
-            <img src={logoBase64} alt="Logo" className="max-w-full max-h-full object-contain" />
-          </div>
-        )}
+        {/* 4. LOGO USANDO O IMPORT DIRETO */}
+        <div className="absolute top-[15mm] right-[15mm] w-40 h-20 flex justify-end items-start">
+          <img src={logoImg} alt="Logo" className="max-w-full max-h-full object-contain" />
+        </div>
 
         {/* TITULO */}
         <h1 className="text-[12.5px] font-bold border-b-2 border-black pb-1 mb-8 mt-16 uppercase whitespace-nowrap overflow-hidden">
@@ -211,8 +199,8 @@ const App: React.FC = () => {
           </div>
           <div>
             <div className="border-t border-black mb-1"></div>
-            <p>{isTR ? 'Payroll' : 'Payroll'}</p>
-            <p className="font-bold uppercase">Amorim Luxuy Group</p>
+            <p>Payroll</p>
+            <p className="font-bold uppercase">Amorim Luxury Group</p>
           </div>
         </div>
       </div>
@@ -300,7 +288,6 @@ const App: React.FC = () => {
             <div className="md:col-span-3 bg-zinc-900 p-8 rounded-3xl border border-zinc-800">
               <h2 className="text-lg font-bold mb-6 uppercase">Dados do Colaborador</h2>
               
-              {/* Dropdown de Template */}
               <div className="mb-6 p-4 bg-zinc-800/50 rounded-xl border border-zinc-700">
                 <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-2">Tipo de Termo</label>
                 <select 
@@ -354,7 +341,6 @@ const App: React.FC = () => {
                   />
                 </div>
 
-                {/* Data de Início / Cessação (muda conforme template) */}
                 <div>
                   <label className="text-[9px] font-bold text-zinc-500 uppercase">
                     {selectedTemplate === 'TR' ? 'Data de Início' : 'Data de Cessação'}
@@ -367,7 +353,6 @@ const App: React.FC = () => {
                   />
                 </div>
 
-                {/* Data de Entrega/Devolução */}
                 <div>
                   <label className="text-[9px] font-bold text-zinc-500 uppercase">
                     {selectedTemplate === 'TR' ? 'Data de Entrega' : 'Data de Devolução'}
