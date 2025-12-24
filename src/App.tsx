@@ -61,7 +61,7 @@ const App: React.FC = () => {
   // Carregar logo da pasta public
   useEffect(() => {
     const loadLogo = async () => {
-      const baseUrl = import.meta.env.PROD ? '/termr/' : './';
+      const baseUrl = import.meta.env.PROD ? '/termroIT/' : './';
       try {
         const response = await fetch(`${baseUrl}logo.jpg`);
         if (response.ok) {
@@ -223,7 +223,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-zinc-950 text-white p-6">
       <header className="max-w-7xl mx-auto flex justify-between items-center mb-8 border-b border-zinc-800 pb-6">
         <h1 className="text-xl font-black uppercase flex items-center gap-2">
-          <Database className="text-indigo-400" /> Termo IT
+          <Database className="text-indigo-400" /> TermoIT
         </h1>
         <div className="flex bg-zinc-900 p-1 rounded-lg">
           <button onClick={() => setActiveTab('upload')} className={`px-4 py-2 rounded-md text-[10px] font-bold uppercase ${activeTab === 'upload' ? 'bg-indigo-600' : 'text-zinc-500'}`}>
